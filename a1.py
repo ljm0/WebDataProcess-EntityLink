@@ -102,72 +102,75 @@ def processWarcfile(record):
 rdd_pairs = rdd.flatMap(processWarcfile)  # RDD with tuples (key, text)
 # Save plain text before transform it for disambiguation
 rdd_disambiguation = rdd_pairs
-print(rdd_pairs.collect())
-rdd_print = rdd_pairs.saveAsTextFile(out_file)
+# print(rdd_pairs.collect())
+# rdd_print = rdd_pairs.saveAsTextFile(out_file)
 
 #NLP - NER
 # 1. Tokenization
 # 2. NER - StanfordNER
 
 
-# def NLP_NER(record):
-#     #sent_text = nltk.sent_tokenize(record)
-#     tokenized_text = nltk.word_tokenize(record)
-#     #FIXME TypeError: a bytes-like object is required, not 'str'
-#     #tokenized_text = [x.encode('utf-8') for x in tokenized_text]
-#     tag_text = nltk.pos_tag(tokenized_text)
+def NLP_NER(record):
+    #sent_text = nltk.sent_tokenize(record)
+    tokenized_text = nltk.word_tokenize(record)
+    #FIXME TypeError: a bytes-like object is required, not 'str'
+    #tokenized_text = [x.encode('utf-8') for x in tokenized_text]
+    tag_text = nltk.pos_tag(tokenized_text)
 
-#     # StanfordNER
-#     ner_text_NER = nlp.tag(tokenized_text)  # Option 1 - Word tokenization
-#     # ner_text = [nlp.tag(s.split()) for s in sent_text] #Option 2 - Sentece tokenization
+    # StanfordNER
+    ner_text_NER = nlp.tag(tokenized_text)  # Option 1 - Word tokenization
+    # ner_text = [nlp.tag(s.split()) for s in sent_text] #Option 2 - Sentece tokenization
 
-#     yield ner_text_NER
-
-
-# # StanfordNERTagger - Files needed
-# # Path may change
-# classifier = '/home/wdps1811/scratch/lib/stanford-ner-2018-10-16/classifiers/english.all.3class.distsim.crf.ser.gz'
-# # Path may change
-# jar = '/home/wdps1811/scratch/lib/stanford-ner-2018-10-16/stanford-ner.jar'
-# nlp = StanfordNERTagger(classifier, jar)
-
-# # RDD tuples (key, tuple(word, label))
-# rdd_ner = rdd_pairs.flatMapValues(NLP_NER)
-
-# # Entity extraction
-# # Extract Name Entities from result - Function to get recognized entities from Stanford NER
-# def get_entities_StanfordNER(record):
-#     entities = []
-#     for i in record:
-#         if (i[1] != 'O' and i[0] not in entities):
-#             entities.append(i[0])
-
-#     yield entities
-
-# # Extract Muliterm Name Entities from result - Function to get recognized entities from Stanford NER
+    yield ner_text_NER
 
 
-# def get_entities_StanfordNER_multiterm(record):
-#     entities = []
-#     last_tag = None
-#     for i in record:
-#         if (i[1] != 'O' and i[0] not in entities):
-#             if i[1] == last_tag:
-#                 if i[0] not in entities[len(entities)-1]:
-#                     entities[len(entities) -
-#                              1] = entities[len(entities)-1]+' '+i[0]
-#             else:
-#                 entities.append(i[0])
-#         last_tag = i[1]
+# StanfordNERTagger - Files needed
+# Path may change
+classifier = '/home/wdps1811/scratch/lib/stanford-ner-2018-10-16/classifiers/english.all.3class.distsim.crf.ser.gz'
+# Path may change
+jar = '/home/wdps1811/scratch/lib/stanford-ner-2018-10-16/stanford-ner.jar'
+nlp = StanfordNERTagger(classifier, jar)
 
-#     yield entities
+# RDD tuples (key, tuple(word, label))
+rdd_ner = rdd_pairs.flatMapValues(NLP_NER)
+
+# Entity extraction
+# Extract Name Entities from result - Function to get recognized entities from Stanford NER
+def get_entities_StanfordNER(record):
+    entities = []
+    for i in record:
+        if (i[1] != 'O' and i[0] not in entities):
+            entities.append(i[0])
+
+    yield entities
+
+# Extract Muliterm Name Entities from result - Function to get recognized entities from Stanford NER
 
 
-# rdd_ner_entities = rdd_ner.flatMapValues(
-#     get_entities_StanfordNER)  # RDD tuples (key, entities)
+def get_entities_StanfordNER_multiterm(record):
+    entities = []
+    last_tag = None
+    for i in record:
+        if (i[1] != 'O' and i[0] not in entities):
+            if i[1] == last_tag:
+                if i[0] not in entities[len(entities)-1]:
+                    entities[len(entities) -
+                             1] = entities[len(entities)-1]+' '+i[0]
+            else:
+                entities.append(i[0])
+        last_tag = i[1]
+
+    yield entities
 
 
-# # Link entities to KB
+rdd_ner_entities = rdd_ner.flatMapValues(
+    get_entities_StanfordNER)  # RDD tuples (key, entities)
+
+
+print(rdd_ner_entities.collect())
+rdd_print = rdd_ner_entities.saveAsTextFile(out_file)
+
+# Link entities to KB
 # ELASTICSEARCH_URL = 'http://10.149.0.127:9200/freebase/label/_search'
 
 # # Get IDs, label and score from ELASTICSEARCH for each entity
