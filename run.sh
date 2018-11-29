@@ -22,3 +22,6 @@ fi
 PYSPARK_PYTHON=$(readlink -f $(which python)) $SPARK_HOME/bin/spark-submit --master local[*] $SCRIPT $WARCID $INFILE $OUTFILE
 
 hdfs dfs -cat $OUTFILE"/*" > $OUTFILE
+# remove the result to project generating  same name file
+hdfs dfs -rm -r  hdfs:///user/wdps1811/$OUTFILE
+
