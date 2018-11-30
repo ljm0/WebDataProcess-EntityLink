@@ -170,7 +170,7 @@ rdd_ner_entities = rdd_ner.flatMapValues(
 #rdd_print = rdd_ner_entities.saveAsTextFile(out_file)
 
 # Link entities to KB
-ELASTICSEARCH_URL = 'http://' + search_url + '/freebase/label/_search' % search_url
+ELASTICSEARCH_URL = 'http://%s/freebase/label/_search' % search_url
 print("ELASTICSEARCH_URL:",ELASTICSEARCH_URL)
 print("search_url:",search_url)
 
