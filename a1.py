@@ -27,12 +27,13 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 sc = SparkContext.getOrCreate()
 
 # Check input parameters
-if len(sys.argv) < 4 or len(sys.argv) > 4:
-    print('Usage - <Warc_key> <Input_file> <output_file>')
-else:
-    record_attribute = sys.argv[1]
-    in_file = sys.argv[2]
-    out_file = sys.argv[3]
+#if len(sys.argv) < 5 or len(sys.argv) > 5:
+#    print('Usage - <Warc_key> <Input_file> <output_file>')
+#else:
+record_attribute = sys.argv[1]
+in_file = sys.argv[2]
+out_file = sys.argv[3]
+search_url = sys.argv[4]
 
 
 # Read warc file and split in WARC/1.0
@@ -165,47 +166,47 @@ def get_entities_StanfordNER_multiterm(record):
 
 rdd_ner_entities = rdd_ner.flatMapValues(
     get_entities_StanfordNER)  # RDD tuples (key, entities)
-
-
-print(rdd_ner_entities.collect())
-rdd_print = rdd_ner_entities.saveAsTextFile(out_file)
+#print(rdd_ner_entities.collect())
+#rdd_print = rdd_ner_entities.saveAsTextFile(out_file)
 
 # Link entities to KB
-# ELASTICSEARCH_URL = 'http://10.149.0.127:9200/freebase/label/_search'
-
-# # Get IDs, label and score from ELASTICSEARCH for each entity
-
-
-# def get_elasticsearch(record):
-#     tuples = []
-#     for i in record:
-#         query = i
-#         response = requests.get(ELASTICSEARCH_URL, params={
-#                                 'q': query, 'size': 100})  # Query all the entities
-#         result = {}
-#         if response:
-#             response = response.json()
-#             for hit in response.get('hits', {}).get('hits', []):
-#                 freebase_id = hit.get('_source', {}).get('resource')
-#                 label = hit.get('_source', {}).get('label')
-#                 score = hit.get('_score', 0)
-
-#                 if result.get(freebase_id) == None:  # Check duplicate id
-#                     # If freebase_id is not in the dict, add all the extract info from JSON
-#                     result[freebase_id] = (
-#                         {'label': label, 'score': score, 'facts': 0, 'match': 0, 'text': '', 'similarity': 0})
-#                 else:
-#                     score_1 = max(result[freebase_id]['score'], score)
-#                     # If freebase_id is in the dict, update the score but not create a new entry
-#                     result[freebase_id]['score'] = score_1
-#         # Return entity with its associated dictionary with the info from elastic search query
-#         tuples.append([i, result])
-#     yield tuples
+ELASTICSEARCH_URL = 'http://' + search_url + '/freebase/label/_search' % search_url
+print("ELASTICSEARCH_URL:",ELASTICSEARCH_URL)
+print("search_url:",search_url)
 
 
-# # RDD (key, [entity, dict{freebase_id: {score,  label}}])
-# rdd_labels = rdd_ner_entities.flatMapValues(get_elasticsearch)
+# Get IDs, label and score from ELASTICSEARCH for each entity
+def get_elasticsearch(record):
+    tuples = []
+    for i in record:
+        query = i
+        response = requests.get(ELASTICSEARCH_URL, params={
+                                'q': query, 'size': 1000})  # Query all the entities
+        result = {}
+        if response:
+            response = response.json()
+            for hit in response.get('hits', {}).get('hits', []):
+                freebase_id = hit.get('_source', {}).get('resource')
+                label = hit.get('_source', {}).get('label')
+                score = hit.get('_score', 0)
 
+                if result.get(freebase_id) == None:  # Check duplicate id
+                    # If freebase_id is not in the dict, add all the extract info from JSON
+                    result[freebase_id] = (
+                        {'label': label, 'score': score, 'facts': 0, 'match': 0, 'text': '', 'similarity': 0})
+                else:
+                    score_1 = max(result[freebase_id]['score'], score)
+                    # If freebase_id is in the dict, update the score but not create a new entry
+                    result[freebase_id]['score'] = score_1
+        # Return entity with its associated dictionary with the info from elastic search query
+        tuples.append([i, result])
+    yield tuples
+
+
+# RDD (key, [entity, dict{freebase_id: {score,  label}}])
+rdd_labels = rdd_ner_entities.flatMapValues(get_elasticsearch)
+#print(rdd_labels.collect())
+rdd_print = rdd_labels.saveAsTextFile(out_file)
 
 # # Link IDs to motherKB
 # TRIDENT_URL = 'http://10.141.0.125:9001/sparql'  # May change
