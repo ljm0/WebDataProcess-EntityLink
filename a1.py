@@ -17,9 +17,9 @@ from bs4.element import Comment
 import nltk
 from nltk.tag import StanfordNERTagger  # NER
 
-#nltk.download('words')
-#nltk.download('punkt')
-#nltk.download('averaged_perceptron_tagger')
+nltk.download('words')
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
 
 import scipy
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -189,7 +189,7 @@ def get_elasticsearch(record):
                 #response.keep_alive = False # TODO1
                 break
             except:
-                time.sleep(5)
+                time.sleep(1)
                 continue
         result = {}
         if response:
