@@ -9,6 +9,7 @@ import json
 import math
 import numpy
 import urllib
+import time
 
 from bs4 import BeautifulSoup
 from bs4.element import Comment
@@ -16,9 +17,9 @@ from bs4.element import Comment
 import nltk
 from nltk.tag import StanfordNERTagger  # NER
 
-nltk.download('words')
-nltk.download('punkt')
-nltk.download('averaged_perceptron_tagger')
+#nltk.download('words')
+#nltk.download('punkt')
+#nltk.download('averaged_perceptron_tagger')
 
 import scipy
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -180,8 +181,16 @@ def get_elasticsearch(record):
     tuples = []
     for i in record:
         query = i
-        response = requests.get(ELASTICSEARCH_URL, params={
-                                'q': query, 'size': 1000})  # Query all the entities
+        #requests.adapters.DEFAULT_RETRIES = 5 # TODO1
+        response = ''
+        while response == '':
+            try:
+                response = requests.get(ELASTICSEARCH_URL, params={'q': query, 'size': 100}) # Query all the entities
+                #response.keep_alive = False # TODO1
+                break
+            except:
+                time.sleep(5)
+                continue
         result = {}
         if response:
             response = response.json()
@@ -189,7 +198,7 @@ def get_elasticsearch(record):
                 freebase_id = hit.get('_source', {}).get('resource')
                 label = hit.get('_source', {}).get('label')
                 score = hit.get('_score', 0)
-
+                #print("label:", label)
                 if result.get(freebase_id) == None:  # Check duplicate id
                     # If freebase_id is not in the dict, add all the extract info from JSON
                     result[freebase_id] = (
