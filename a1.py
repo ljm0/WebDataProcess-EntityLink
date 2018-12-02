@@ -209,6 +209,7 @@ def get_elasticsearch(record):
                     result[freebase_id]['score'] = score_1
         # Return entity with its associated dictionary with the info from elastic search query
         tuples.append([i, result])
+    print(tuples)
     yield tuples
 
 
