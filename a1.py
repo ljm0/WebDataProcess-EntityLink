@@ -35,6 +35,8 @@ record_attribute = sys.argv[1]
 in_file = sys.argv[2]
 out_file = sys.argv[3]
 search_url = sys.argv[4]
+# search_url_1 = sys.argv[5]
+# search_url_2 = sys.argv[6]
 
 
 # Read warc file and split in WARC/1.0
@@ -175,22 +177,52 @@ ELASTICSEARCH_URL = 'http://%s/freebase/label/_search' % search_url
 print("ELASTICSEARCH_URL:",ELASTICSEARCH_URL)
 print("search_url:",search_url)
 
+# ELASTICSEARCH_URL1 = 'http://%s/freebase/label/_search' % search_url_1
+# print("ELASTICSEARCH_URL1:", ELASTICSEARCH_URL1)
 
+# ELASTICSEARCH_URL2 = 'http://%s/freebase/label/_search' % search_url_2
+# print("ELASTICSEARCH_URL2:", ELASTICSEARCH_URL2)
+
+def getNewElasticsearchURL():
+    tempP = os.popen('sh ./getElasticsearchURL.sh')
+    domain=tempP.read()
+    NEW_URL = 'http://%s/freebase/label/_search' % domain
+    print("my elascticsearch_url: =======================", NEW_URL)
+    tempP.close()
+    return NEW_URL
+
+number_for = 0
 # Get IDs, label and score from ELASTICSEARCH for each entity
 def get_elasticsearch(record):
+    global ELASTICSEARCH_URL
+    global number_for
+#    print("number_for", number_for)
     tuples = []
     for i in record:
         query = i
-        #requests.adapters.DEFAULT_RETRIES = 5 # TODO1
-        response = ''
-        while response == '':
-            try:
-                response = requests.get(ELASTICSEARCH_URL, params={'q': query, 'size': 100}) # Query all the entities
-                #response.keep_alive = False # TODO1
-                break
-            except:
-                time.sleep(1)
-                continue
+        # requests.adapters.DEFAULT_RETRIES = 5 # TODO1
+        # s = requests.session()
+        # s.keep_alive = False
+        # response = s.get(ELASTICSEARCH_URL, params={'q': query, 'size': 100})
+        # response = requests.get(ELASTICSEARCH_URL, params={'q': query, 'size': 100})
+##########################################################################
+        try:
+            response = requests.get(ELASTICSEARCH_URL, params={'q': query, 'size': 100})
+        except:
+#            print("error_number_for", number_for)
+            return 0
+##########################################################################
+        # response = ''
+        # while response == '':
+        #     try:
+        #         response = requests.get(ELASTICSEARCH_URL, params={'q': query, 'size': 100})
+        #         break
+        #     except:
+                # ELASTICSEARCH_URL = ELASTICSEARCH_URL1
+                # ELASTICSEARCH_URL = getNewElasticsearchURL()
+                # # time.sleep(0.1)
+                # continue
+############################################################################
         result = {}
         if response:
             response = response.json()
@@ -209,7 +241,8 @@ def get_elasticsearch(record):
                     result[freebase_id]['score'] = score_1
         # Return entity with its associated dictionary with the info from elastic search query
         tuples.append([i, result])
-    print(tuples)
+        number_for += 1
+#    print(tuples)
     yield tuples
 
 
