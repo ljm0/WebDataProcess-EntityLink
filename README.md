@@ -1,6 +1,6 @@
-# WDPS assignment of group 11
+# Web_Data_Entity_Linking
 
-Team members: Wenchen Lai, Shuqi Yan, Jiamian Liu, Xiaoyu Yang
+This project is to perform Entity Linking on a collection of web pages.
 
 ## Description
 
