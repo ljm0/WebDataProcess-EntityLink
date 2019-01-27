@@ -1,10 +1,8 @@
 # Web_Data_Entity_Linking
 
-This project is to perform Entity Linking on a collection of web pages.
-
 ## Description
 
-This project is to perform Entity Linking on a collection of web pages. Our method consists of the following five steps:  
+This project is to perform Entity Linking on a collection of web pages. the method consists of the following five steps:  
 
 1. extract text from HTML pages in WARC files using beautifulsoups
 2. tokenize each text and recognize named entities in the content using nltk
