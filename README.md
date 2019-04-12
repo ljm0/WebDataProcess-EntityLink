@@ -1,7 +1,7 @@
 # Web_Data_Entity_Linking
 
 ## Description
-![avatar](Web.png)
+![avatar](Frame.png)
 This project is to perform Entity Linking on a collection of web pages. the method consists of the following five steps:  
 
 1. extract text from HTML pages in WARC files using beautifulsoups
