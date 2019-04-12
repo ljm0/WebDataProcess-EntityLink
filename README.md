@@ -1,4 +1,7 @@
 # Web_Data_Entity_Linking
+## How to understand the web data?
+- Build a knowledge base
+![avatar](example1.png)
 
 ## Description
 ![avatar](Frame.png)
@@ -17,7 +20,8 @@ This project is to perform Entity Linking on a collection of web pages. the meth
    return the result in the format: document IDs + '\t' + entity surface form + '\t' + Freebase entity ID
 
 We also perform our method with Spark at cluster mode.
-
+- Jobs: /m/0k8z
+![avatar](example2.png)
 ## Prerequisites
 
 python-package: beautifulsoup4, nltk, sklearn, requests 
