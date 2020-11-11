@@ -1,4 +1,12 @@
 # Web_Data_Entity_Linking
+- Built a NLP pipeline to link web text data into knowledge based on Spark by Python
+- Extracted raw text by Beautifulsoups and pre-processed data by Pandas
+- Tokenized text and recognized named entities by NLTK and Standford NER
+- Linked each mention to candidate entities in Freebase knowledge base by Elasticsearch
+- Queried each candidate's abstract in DBpedia database using SPARQL
+- Computed entities similarity by Scikit-learn and got 3.4% precision, 1.2% recall, 5.4% F1
+
+
 ## How to understand the web data?
 - Build a knowledge base
 ![avatar](example1.png)
