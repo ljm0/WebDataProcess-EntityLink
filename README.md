@@ -8,7 +8,6 @@
 
 
 ## How to understand the web data?
-- Build a knowledge base
 ![avatar](example1.png)
 
 ## Description
