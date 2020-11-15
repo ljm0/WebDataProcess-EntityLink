@@ -1,4 +1,4 @@
-# Web_Data_Entity_Linking
+# Web Data Process System (NLP/Entity Linking)
 - Built a NLP pipeline to link web text data into knowledge based on Spark by Python
 - Extracted raw text by Beautifulsoups and pre-processed data by Pandas
 - Tokenized text and recognized named entities by NLTK and Standford NER
